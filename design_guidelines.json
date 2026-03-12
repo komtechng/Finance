@@ -1,0 +1,163 @@
+{
+  "project_name": "NaijaFinance Enterprise Platform",
+  "version": "1.0",
+  "theme_strategy": {
+    "default_mode": "light",
+    "allow_toggle": true,
+    "primary_archetype": "Organic & Earthy (Trust/Growth) mixed with Swiss Authority",
+    "emotional_goal": "Trust, Stability, Prosperity, Efficiency"
+  },
+  "typography": {
+    "font_family_heading": "Manrope, sans-serif",
+    "font_family_body": "Inter, sans-serif",
+    "font_family_code": "JetBrains Mono, monospace",
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "h4": "text-xl font-medium",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed text-slate-600",
+      "caption": "text-sm text-slate-500 font-medium",
+      "label": "text-xs font-bold uppercase tracking-widest text-slate-400"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#064E3B",
+        "foreground": "#FFFFFF",
+        "50": "#ECFDF5",
+        "100": "#D1FAE5",
+        "500": "#10B981",
+        "900": "#064E3B"
+      },
+      "secondary": {
+        "DEFAULT": "#D97706",
+        "foreground": "#FFFFFF",
+        "100": "#FEF3C7",
+        "500": "#F59E0B",
+        "900": "#78350F"
+      },
+      "accent": {
+        "DEFAULT": "#F1F5F9",
+        "foreground": "#0F172A"
+      },
+      "background": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "border": "#E2E8F0",
+      "success": "#059669",
+      "warning": "#D97706",
+      "error": "#DC2626",
+      "info": "#2563EB"
+    },
+    "gradients": {
+      "hero": "bg-gradient-to-br from-[#064E3B] to-[#047857]",
+      "card_highlight": "bg-gradient-to-r from-emerald-50 to-transparent",
+      "gold_shimmer": "bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200"
+    }
+  },
+  "visual_enhancers": {
+    "radius": {
+      "default": "rounded-lg",
+      "card": "rounded-xl",
+      "button": "rounded-md"
+    },
+    "shadows": {
+      "card": "shadow-[0_2px_8px_rgba(0,0,0,0.08)]",
+      "float": "shadow-[0_8px_30px_rgb(0,0,0,0.12)]",
+      "inner": "shadow-inner"
+    },
+    "borders": {
+      "subtle": "border border-slate-200",
+      "active": "border-emerald-500 ring-2 ring-emerald-100"
+    }
+  },
+  "layout_strategies": {
+    "dashboard_grid": {
+      "type": "bento",
+      "className": "grid grid-cols-1 md:grid-cols-12 gap-6 p-6",
+      "areas": {
+        "hero_metric": "col-span-12 md:col-span-8 lg:col-span-6 row-span-2",
+        "quick_stat": "col-span-6 md:col-span-4 lg:col-span-3",
+        "feed": "col-span-12 md:col-span-4 lg:col-span-3 row-span-2"
+      }
+    },
+    "marketing_section": {
+      "className": "max-w-7xl mx-auto px-6 py-24",
+      "alignment": "left-aligned with generous negative space"
+    },
+    "mobile_agent_view": {
+      "type": "stack",
+      "className": "flex flex-col gap-4 p-4 pb-24",
+      "bottom_nav": "fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4"
+    }
+  },
+  "component_rules": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md font-medium px-6 py-2.5",
+      "secondary": "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium",
+      "ghost": "hover:bg-slate-100 text-slate-600",
+      "destructive": "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+    },
+    "cards": {
+      "base": "bg-white border border-slate-100 shadow-card p-6 flex flex-col gap-4",
+      "interactive": "hover:border-emerald-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+    },
+    "inputs": {
+      "base": "h-11 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 bg-white"
+    },
+    "tables": {
+      "wrapper": "rounded-lg border border-slate-200 overflow-hidden bg-white",
+      "header": "bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider py-3 px-4",
+      "row": "border-b border-slate-100 hover:bg-slate-50 transition-colors",
+      "cell": "py-3 px-4 text-sm text-slate-700"
+    },
+    "status_badges": {
+      "success": "bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "pending": "bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "failed": "bg-red-50 text-red-700 border border-red-100 px-2.5 py-0.5 rounded-full text-xs font-medium"
+    }
+  },
+  "motion": {
+    "hover": "transition-all duration-200 ease-out",
+    "page_enter": "animate-in fade-in slide-in-from-bottom-4 duration-500",
+    "list_stagger": "stagger-children-100"
+  },
+  "image_assets": {
+    "login_hero": {
+      "url": "https://images.unsplash.com/photo-1748002766408-781073724c5f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwzfHxhZnJpY2FuJTIwY29tbXVuaXR5JTIwZmluYW5jZSUyMGdyb3d0aHxlbnwwfHx8fDE3NzMzNTY3NDl8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Community market scene representing growth",
+      "usage": "Split screen login layout, left side, full height"
+    },
+    "dashboard_banner": {
+      "url": "https://images.unsplash.com/photo-1629787177096-9fbe3e2ef6f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBmaW50ZWNoJTIwb2ZmaWNlJTIwdGVhbXxlbnwwfHx8fDE3NzMzNTY3NTB8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern fintech team",
+      "usage": "Welcome banner or About page hero"
+    },
+    "placeholders": {
+      "user_avatar": "https://ui.shadcn.com/avatars/01.png",
+      "market_scene": "https://images.unsplash.com/photo-1734255026082-82fdc81991f0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwY29tbXVuaXR5JTIwZmluYW5jZSUyMGdyb3d0aHxlbnwwfHx8fDE3NzMzNTY3NDl8MA&ixlib=rb-4.1.0&q=85"
+    }
+  },
+  "3d_libraries": {
+    "charts": "Recharts (Shadcn Charts)",
+    "interactive": "Framer Motion (for transitions)",
+    "use_heavy_3d": false,
+    "note": "Avoid heavy 3D. Prioritize speed and data density."
+  },
+  "accessibility": {
+    "focus_ring": "focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+    "text_contrast": "Ensure Slate-500+ on white backgrounds. Avoid yellow text on white."
+  },
+  "universal_guidelines": [
+    "Do NOT use gradients for text.",
+    "Do NOT center align dashboard layouts; use left alignment for data.",
+    "Use 'sonner' for all toast notifications.",
+    "Inputs must have a distinct focus state.",
+    "For financial data, use tabular lining figures (font-variant-numeric: tabular-nums) in CSS.",
+    "Mobile views must have a bottom navigation bar for agents.",
+    "Always provide a 'Print' or 'Export' button for transaction receipts."
+  ],
+  "instructions_to_main_agent": "Implement the 'Swiss Finance' look. Use the Emerald Green primary color (#064E3B) for all primary actions. Use the Bento Grid for the main dashboard. Ensure the Agent Mobile View is prioritized as a distinct layout mode (hidden on desktop, visible on mobile). Use Shadcn components but override the radius to 'rounded-lg' and use the specific border colors defined."
+}
