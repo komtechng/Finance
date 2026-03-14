@@ -21,11 +21,11 @@ module.exports = {
           900: "#064E3B"
         },
         secondary: {
-          DEFAULT: "#D97706",
+          DEFAULT: "#475569",
           foreground: "#FFFFFF",
-          100: "#FEF3C7",
-          500: "#F59E0B",
-          900: "#78350F"
+          100: "#F1F5F9",
+          500: "#64748B",
+          900: "#1E293B"
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -48,7 +48,7 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))"
         },
         success: "#059669",
-        warning: "#D97706",
+        warning: "#F59E0B",
         error: "#DC2626",
         info: "#2563EB"
       },

@@ -236,7 +236,7 @@ export default function LoansPage() {
                             Approved
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-full text-xs font-medium">
+                          <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-100 px-2.5 py-0.5 rounded-full text-xs font-medium">
                             <Clock className="w-3 h-3" />
                             Pending
                           </span>
@@ -276,7 +276,7 @@ export default function LoansPage() {
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     loan.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                     loan.status === 'active' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
-                    'bg-amber-50 text-amber-700 border border-amber-100'
+                    'bg-orange-50 text-orange-700 border border-orange-100'
                   }`}>
                     {loan.status}
                   </span>

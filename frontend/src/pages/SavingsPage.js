@@ -356,7 +356,7 @@ export default function SavingsPage() {
                               Verified
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-full text-xs font-medium" data-testid={`status-pending-${txn.id}`}>
+                            <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-100 px-2.5 py-0.5 rounded-full text-xs font-medium" data-testid={`status-pending-${txn.id}`}>
                               <Clock className="w-3 h-3" />
                               Pending
                             </span>

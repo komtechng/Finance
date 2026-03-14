@@ -60,8 +60,8 @@ export default function DashboardPage() {
       title: 'Outstanding Loans',
       value: formatCurrency(metrics?.total_loans_outstanding || 0),
       icon: TrendingUp,
-      color: 'bg-amber-50 text-amber-600',
-      borderColor: 'border-amber-100'
+      color: 'bg-orange-50 text-orange-600',
+      borderColor: 'border-orange-100'
     },
     {
       title: 'Cash on Hand',
@@ -118,14 +118,14 @@ export default function DashboardPage() {
       </div>
 
       {metrics?.pending_loan_applications > 0 && (
-        <Card className="p-6 border border-amber-200 bg-amber-50 mb-8" data-testid="pending-loans-alert">
+        <Card className="p-6 border border-orange-200 bg-orange-50 mb-8" data-testid="pending-loans-alert">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
+            <AlertTriangle className="w-6 h-6 text-orange-600" />
             <div>
-              <h3 className="font-semibold text-amber-900">
+              <h3 className="font-semibold text-orange-900">
                 {metrics.pending_loan_applications} Pending Loan Applications
               </h3>
-              <p className="text-sm text-amber-700">
+              <p className="text-sm text-orange-700">
                 Review and approve pending loan applications
               </p>
             </div>
