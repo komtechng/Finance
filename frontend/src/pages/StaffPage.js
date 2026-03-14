@@ -94,24 +94,25 @@ export default function StaffPage() {
                 Add Staff Member
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white max-w-md">
               <DialogHeader>
-                <DialogTitle>Add New Staff Member</DialogTitle>
+                <DialogTitle className="text-2xl font-heading font-semibold text-slate-900">Add New Staff Member</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4" data-testid="staff-form">
-                <div>
-                  <Label htmlFor="full_name">Full Name</Label>
+              <form onSubmit={handleSubmit} className="space-y-5 mt-4" data-testid="staff-form">
+                <div className="space-y-2">
+                  <Label htmlFor="full_name" className="text-slate-700 font-medium">Full Name</Label>
                   <Input 
                     id="full_name" 
                     value={formData.full_name} 
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} 
                     required 
                     placeholder="John Doe"
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
                     data-testid="staff-name-input" 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-slate-700 font-medium">Email Address</Label>
                   <Input 
                     id="email" 
                     type="email" 
@@ -119,22 +120,24 @@ export default function StaffPage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
                     required 
                     placeholder="john@example.com"
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
                     data-testid="staff-email-input" 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-slate-700 font-medium">Phone Number</Label>
                   <Input 
                     id="phone" 
                     value={formData.phone} 
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
                     required 
                     placeholder="+234 800 000 0000"
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
                     data-testid="staff-phone-input" 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-slate-700 font-medium">Password</Label>
                   <Input 
                     id="password" 
                     type="password" 
@@ -142,13 +145,14 @@ export default function StaffPage() {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
                     required 
                     placeholder="Minimum 8 characters"
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
                     data-testid="staff-password-input" 
                   />
                 </div>
-                <div>
-                  <Label>Role</Label>
+                <div className="space-y-2">
+                  <Label className="text-slate-700 font-medium">Role</Label>
                   <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                    <SelectTrigger data-testid="staff-role-select">
+                    <SelectTrigger className="h-11" data-testid="staff-role-select">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -167,7 +171,7 @@ export default function StaffPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" className="w-full bg-primary text-white" data-testid="submit-staff-button">
+                <Button type="submit" className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-medium shadow-md mt-6" data-testid="submit-staff-button">
                   Add Staff Member
                 </Button>
               </form>
