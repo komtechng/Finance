@@ -61,6 +61,20 @@ class SavingsFrequency(str, Enum):
     WEEKLY = "weekly"
     MONTHLY = "monthly"
 
+class LoanType(str, Enum):
+    PERSONAL = "personal"
+    BUSINESS = "business"
+    SALARY_ADVANCE = "salary_advance"
+    EMERGENCY = "emergency"
+    EDUCATION = "education"
+    AGRICULTURE = "agriculture"
+
+class DisbursementMethod(str, Enum):
+    CASH = "cash"
+    BANK_TRANSFER = "bank_transfer"
+    MOBILE_MONEY = "mobile_money"
+    CHEQUE = "cheque"
+
 class LoanStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
@@ -68,6 +82,7 @@ class LoanStatus(str, Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
     DEFAULTED = "defaulted"
+    REJECTED = "rejected"
 
 class TransactionType(str, Enum):
     DEPOSIT = "deposit"
@@ -181,23 +196,40 @@ class LoanApplication(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     application_number: str
     customer_id: str
+    loan_type: LoanType = LoanType.PERSONAL
     loan_amount: float
     purpose: str
+    duration_months: int
+    employment_status: Optional[str] = None
+    monthly_income: Optional[float] = None
+    collateral_type: Optional[str] = None
+    collateral_value: Optional[float] = None
     guarantor_name: str
     guarantor_phone: str
+    guarantor_address: Optional[str] = None
+    guarantor_relationship: Optional[str] = None
     status: LoanStatus = LoanStatus.PENDING
     applied_by: str
     applied_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviewed_by: Optional[str] = None
     reviewed_at: Optional[datetime] = None
+    rejection_reason: Optional[str] = None
     notes: Optional[str] = None
 
 class LoanApplicationCreate(BaseModel):
     customer_id: str
+    loan_type: LoanType = LoanType.PERSONAL
     loan_amount: float
     purpose: str
+    duration_months: int
+    employment_status: Optional[str] = None
+    monthly_income: Optional[float] = None
+    collateral_type: Optional[str] = None
+    collateral_value: Optional[float] = None
     guarantor_name: str
     guarantor_phone: str
+    guarantor_address: Optional[str] = None
+    guarantor_relationship: Optional[str] = None
 
 class Loan(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -205,23 +237,40 @@ class Loan(BaseModel):
     loan_number: str
     application_id: str
     customer_id: str
+    loan_type: LoanType
     principal_amount: float
     interest_rate: float
     duration_months: int
     monthly_payment: float
     total_repayable: float
+    processing_fee: float = 0.0
+    insurance_fee: float = 0.0
+    late_payment_penalty_rate: float = 5.0
+    grace_period_days: int = 3
     amount_paid: float = 0.0
     outstanding_balance: float
+    total_penalties: float = 0.0
+    disbursement_method: DisbursementMethod = DisbursementMethod.CASH
     disbursement_date: Optional[datetime] = None
+    disbursement_reference: Optional[str] = None
+    first_payment_date: Optional[datetime] = None
+    next_payment_date: Optional[datetime] = None
+    loan_officer_id: str
     status: LoanStatus = LoanStatus.APPROVED
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class LoanCreate(BaseModel):
     application_id: str
     customer_id: str
+    loan_type: LoanType
     principal_amount: float
     interest_rate: float
     duration_months: int
+    processing_fee: float = 0.0
+    insurance_fee: float = 0.0
+    late_payment_penalty_rate: float = 5.0
+    grace_period_days: int = 3
+    disbursement_method: DisbursementMethod = DisbursementMethod.CASH
 
 class LoanRepayment(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -671,23 +720,35 @@ async def create_loan(loan_input: LoanCreate, current_user: User = Depends(get_c
     count = await db.loans.count_documents({})
     loan_number = f"LN{count + 1:08d}"
     
+    # Calculate monthly payment and total repayable
     monthly_rate = loan_input.interest_rate / 100 / 12
-    monthly_payment = (loan_input.principal_amount * monthly_rate * (1 + monthly_rate) ** loan_input.duration_months) / ((1 + monthly_rate) ** loan_input.duration_months - 1)
+    if monthly_rate > 0:
+        monthly_payment = (loan_input.principal_amount * monthly_rate * (1 + monthly_rate) ** loan_input.duration_months) / ((1 + monthly_rate) ** loan_input.duration_months - 1)
+    else:
+        monthly_payment = loan_input.principal_amount / loan_input.duration_months
+    
     total_repayable = monthly_payment * loan_input.duration_months
+    
+    # Calculate first payment date (30 days from now)
+    first_payment_date = datetime.now(timezone.utc) + timedelta(days=30)
     
     loan = Loan(
         **loan_input.model_dump(),
         loan_number=loan_number,
         monthly_payment=round(monthly_payment, 2),
         total_repayable=round(total_repayable, 2),
-        outstanding_balance=round(total_repayable, 2)
+        outstanding_balance=round(total_repayable, 2),
+        first_payment_date=first_payment_date,
+        next_payment_date=first_payment_date,
+        loan_officer_id=current_user.id
     )
     doc = serialize_datetime(loan.model_dump())
     await db.loans.insert_one(doc)
     
+    # Update application status
     await db.loan_applications.update_one(
         {"id": loan_input.application_id},
-        {"$set": {"status": LoanStatus.DISBURSED.value}}
+        {"$set": {"status": LoanStatus.APPROVED.value}}
     )
     
     return loan
@@ -703,6 +764,29 @@ async def get_loans(customer_id: Optional[str] = None, current_user: User = Depe
         deserialize_datetime(loan, ['disbursement_date', 'created_at'])
     return loans
 
+@api_router.post("/loans/{loan_id}/disburse")
+async def disburse_loan(
+    loan_id: str, 
+    disbursement_reference: str,
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in [UserRole.LOAN_OFFICER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN, UserRole.CASHIER]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    result = await db.loans.update_one(
+        {"id": loan_id},
+        {"$set": {
+            "status": LoanStatus.ACTIVE.value,
+            "disbursement_date": datetime.now(timezone.utc).isoformat(),
+            "disbursement_reference": disbursement_reference
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    
+    return {"message": "Loan disbursed successfully"}
+
 @api_router.post("/loans/repayments", response_model=LoanRepayment)
 async def create_loan_repayment(repayment_input: LoanRepaymentCreate, current_user: User = Depends(get_current_user)):
     loan = await db.loans.find_one({"id": repayment_input.loan_id})
@@ -716,10 +800,22 @@ async def create_loan_repayment(repayment_input: LoanRepaymentCreate, current_us
     new_amount_paid = loan.get('amount_paid', 0) + repayment_input.amount
     new_outstanding = loan.get('outstanding_balance', 0) - repayment_input.amount
     
+    # Calculate next payment date (add 30 days to current next payment date)
+    current_next_payment = loan.get('next_payment_date')
+    if isinstance(current_next_payment, str):
+        current_next_payment = datetime.fromisoformat(current_next_payment)
+    
+    if current_next_payment:
+        next_payment_date = current_next_payment + timedelta(days=30)
+    else:
+        next_payment_date = datetime.now(timezone.utc) + timedelta(days=30)
+    
     update_data = {
         "amount_paid": new_amount_paid,
-        "outstanding_balance": max(0, new_outstanding)
+        "outstanding_balance": max(0, new_outstanding),
+        "next_payment_date": next_payment_date.isoformat()
     }
+    
     if new_outstanding <= 0:
         update_data['status'] = LoanStatus.COMPLETED.value
     

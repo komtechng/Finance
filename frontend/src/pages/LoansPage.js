@@ -24,10 +24,18 @@ export default function LoansPage() {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [appForm, setAppForm] = useState({
     customer_id: '',
+    loan_type: 'personal',
     loan_amount: '',
+    duration_months: '12',
     purpose: '',
+    employment_status: '',
+    monthly_income: '',
+    collateral_type: '',
+    collateral_value: '',
     guarantor_name: '',
-    guarantor_phone: ''
+    guarantor_phone: '',
+    guarantor_address: '',
+    guarantor_relationship: ''
   });
   const [repaymentForm, setRepaymentForm] = useState({
     loan_id: '',
@@ -62,11 +70,28 @@ export default function LoansPage() {
     try {
       await api.post('/loans/applications', {
         ...appForm,
-        loan_amount: parseFloat(appForm.loan_amount)
+        loan_amount: parseFloat(appForm.loan_amount),
+        duration_months: parseInt(appForm.duration_months),
+        monthly_income: appForm.monthly_income ? parseFloat(appForm.monthly_income) : null,
+        collateral_value: appForm.collateral_value ? parseFloat(appForm.collateral_value) : null
       });
       toast.success('Loan application submitted');
       setOpenApp(false);
-      setAppForm({ customer_id: '', loan_amount: '', purpose: '', guarantor_name: '', guarantor_phone: '' });
+      setAppForm({ 
+        customer_id: '', 
+        loan_type: 'personal',
+        loan_amount: '', 
+        duration_months: '12',
+        purpose: '', 
+        employment_status: '',
+        monthly_income: '',
+        collateral_type: '',
+        collateral_value: '',
+        guarantor_name: '', 
+        guarantor_phone: '',
+        guarantor_address: '',
+        guarantor_relationship: ''
+      });
       loadData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to submit application');
@@ -120,41 +145,202 @@ export default function LoansPage() {
                 New Application
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="bg-white max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Submit Loan Application</DialogTitle>
+                <DialogTitle className="text-2xl font-heading font-semibold text-slate-900">Submit Loan Application</DialogTitle>
+                <p className="text-sm text-slate-600">Complete all required fields for loan processing</p>
               </DialogHeader>
-              <form onSubmit={handleAppSubmit} className="space-y-4" data-testid="loan-application-form">
-                <div>
-                  <Label>Customer</Label>
+              <form onSubmit={handleAppSubmit} className="space-y-5 mt-4" data-testid="loan-application-form">
+                <div className="space-y-2">
+                  <Label className="text-slate-700 font-medium">Customer *</Label>
                   <Select value={appForm.customer_id} onValueChange={(value) => setAppForm({ ...appForm, customer_id: value })}>
-                    <SelectTrigger data-testid="customer-select">
+                    <SelectTrigger className="h-11" data-testid="customer-select">
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
                       {customers.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
+                        <SelectItem key={c.id} value={c.id}>{c.full_name} - {c.customer_number}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="loan_amount">Loan Amount (NGN)</Label>
-                  <Input id="loan_amount" type="number" step="0.01" value={appForm.loan_amount} onChange={(e) => setAppForm({ ...appForm, loan_amount: e.target.value })} required data-testid="loan-amount-input" />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 font-medium">Loan Type *</Label>
+                    <Select value={appForm.loan_type} onValueChange={(value) => setAppForm({ ...appForm, loan_type: value })}>
+                      <SelectTrigger className="h-11" data-testid="loan-type-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="personal">Personal Loan</SelectItem>
+                        <SelectItem value="business">Business Loan</SelectItem>
+                        <SelectItem value="salary_advance">Salary Advance</SelectItem>
+                        <SelectItem value="emergency">Emergency Loan</SelectItem>
+                        <SelectItem value="education">Education Loan</SelectItem>
+                        <SelectItem value="agriculture">Agriculture Loan</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration_months" className="text-slate-700 font-medium">Duration (Months) *</Label>
+                    <Input 
+                      id="duration_months" 
+                      type="number" 
+                      value={appForm.duration_months} 
+                      onChange={(e) => setAppForm({ ...appForm, duration_months: e.target.value })} 
+                      required 
+                      className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                      data-testid="duration-input" 
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="purpose">Purpose</Label>
-                  <Textarea id="purpose" value={appForm.purpose} onChange={(e) => setAppForm({ ...appForm, purpose: e.target.value })} required data-testid="loan-purpose-input" />
+
+                <div className="space-y-2">
+                  <Label htmlFor="loan_amount" className="text-slate-700 font-medium">Loan Amount (NGN) *</Label>
+                  <Input 
+                    id="loan_amount" 
+                    type="number" 
+                    step="0.01" 
+                    value={appForm.loan_amount} 
+                    onChange={(e) => setAppForm({ ...appForm, loan_amount: e.target.value })} 
+                    required 
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                    placeholder="100000"
+                    data-testid="loan-amount-input" 
+                  />
                 </div>
-                <div>
-                  <Label htmlFor="guarantor_name">Guarantor Name</Label>
-                  <Input id="guarantor_name" value={appForm.guarantor_name} onChange={(e) => setAppForm({ ...appForm, guarantor_name: e.target.value })} required data-testid="guarantor-name-input" />
+
+                <div className="space-y-2">
+                  <Label htmlFor="purpose" className="text-slate-700 font-medium">Loan Purpose *</Label>
+                  <Textarea 
+                    id="purpose" 
+                    value={appForm.purpose} 
+                    onChange={(e) => setAppForm({ ...appForm, purpose: e.target.value })} 
+                    required 
+                    className="border-slate-200 focus:border-primary focus:ring-primary/20"
+                    placeholder="Describe the purpose of this loan"
+                    data-testid="loan-purpose-input" 
+                  />
                 </div>
-                <div>
-                  <Label htmlFor="guarantor_phone">Guarantor Phone</Label>
-                  <Input id="guarantor_phone" value={appForm.guarantor_phone} onChange={(e) => setAppForm({ ...appForm, guarantor_phone: e.target.value })} required data-testid="guarantor-phone-input" />
+
+                <div className="border-t border-slate-200 pt-4">
+                  <h4 className="font-semibold text-slate-900 mb-3">Employment & Income Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="employment_status" className="text-slate-700 font-medium">Employment Status</Label>
+                      <Input 
+                        id="employment_status" 
+                        value={appForm.employment_status} 
+                        onChange={(e) => setAppForm({ ...appForm, employment_status: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="e.g., Employed, Self-employed"
+                        data-testid="employment-status-input" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="monthly_income" className="text-slate-700 font-medium">Monthly Income (NGN)</Label>
+                      <Input 
+                        id="monthly_income" 
+                        type="number" 
+                        step="0.01" 
+                        value={appForm.monthly_income} 
+                        onChange={(e) => setAppForm({ ...appForm, monthly_income: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="50000"
+                        data-testid="monthly-income-input" 
+                      />
+                    </div>
+                  </div>
                 </div>
-                <Button type="submit" className="w-full bg-primary text-white" data-testid="submit-application-button">Submit Application</Button>
+
+                <div className="border-t border-slate-200 pt-4">
+                  <h4 className="font-semibold text-slate-900 mb-3">Collateral Information (Optional)</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="collateral_type" className="text-slate-700 font-medium">Collateral Type</Label>
+                      <Input 
+                        id="collateral_type" 
+                        value={appForm.collateral_type} 
+                        onChange={(e) => setAppForm({ ...appForm, collateral_type: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="e.g., Land, Vehicle, Equipment"
+                        data-testid="collateral-type-input" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="collateral_value" className="text-slate-700 font-medium">Estimated Value (NGN)</Label>
+                      <Input 
+                        id="collateral_value" 
+                        type="number" 
+                        step="0.01" 
+                        value={appForm.collateral_value} 
+                        onChange={(e) => setAppForm({ ...appForm, collateral_value: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="500000"
+                        data-testid="collateral-value-input" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-200 pt-4">
+                  <h4 className="font-semibold text-slate-900 mb-3">Guarantor Information *</h4>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="guarantor_name" className="text-slate-700 font-medium">Guarantor Name *</Label>
+                        <Input 
+                          id="guarantor_name" 
+                          value={appForm.guarantor_name} 
+                          onChange={(e) => setAppForm({ ...appForm, guarantor_name: e.target.value })} 
+                          required 
+                          className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                          placeholder="Full name"
+                          data-testid="guarantor-name-input" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="guarantor_phone" className="text-slate-700 font-medium">Guarantor Phone *</Label>
+                        <Input 
+                          id="guarantor_phone" 
+                          value={appForm.guarantor_phone} 
+                          onChange={(e) => setAppForm({ ...appForm, guarantor_phone: e.target.value })} 
+                          required 
+                          className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                          placeholder="+234 800 000 0000"
+                          data-testid="guarantor-phone-input" 
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guarantor_address" className="text-slate-700 font-medium">Guarantor Address</Label>
+                      <Input 
+                        id="guarantor_address" 
+                        value={appForm.guarantor_address} 
+                        onChange={(e) => setAppForm({ ...appForm, guarantor_address: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="Complete address"
+                        data-testid="guarantor-address-input" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guarantor_relationship" className="text-slate-700 font-medium">Relationship to Applicant</Label>
+                      <Input 
+                        id="guarantor_relationship" 
+                        value={appForm.guarantor_relationship} 
+                        onChange={(e) => setAppForm({ ...appForm, guarantor_relationship: e.target.value })} 
+                        className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="e.g., Spouse, Parent, Friend"
+                        data-testid="guarantor-relationship-input" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-medium shadow-md mt-6" data-testid="submit-application-button">
+                  Submit Loan Application
+                </Button>
               </form>
             </DialogContent>
           </Dialog>
