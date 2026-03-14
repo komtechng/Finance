@@ -138,7 +138,7 @@ JWT_SECRET_KEY=your-secret-key-change-in-production-2024
 
 **Frontend (.env)**
 ```
-REACT_APP_BACKEND_URL=https://your-domain.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://esusu-platform.preview.emergentagent.com
 ```
 
 ## 📊 API Endpoints

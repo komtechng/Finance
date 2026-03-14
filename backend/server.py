@@ -647,7 +647,7 @@ async def get_savings_transactions(
 
 @api_router.post("/savings/transactions/{transaction_id}/verify")
 async def verify_transaction(transaction_id: str, current_user: User = Depends(get_current_user)):
-    if current_user.role not in [UserRole.CASHIER, UserRole.BRANCH_MANAGER]:
+    if current_user.role not in [UserRole.CASHIER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     result = await db.savings_transactions.update_one(
@@ -698,7 +698,14 @@ async def approve_loan_application(application_id: str, current_user: User = Dep
     if current_user.role not in [UserRole.LOAN_OFFICER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    result = await db.loan_applications.update_one(
+    application = await db.loan_applications.find_one({"id": application_id}, {"_id": 0})
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    if application.get("status") != LoanStatus.PENDING.value:
+        raise HTTPException(status_code=400, detail="Application is not in pending status")
+    
+    await db.loan_applications.update_one(
         {"id": application_id},
         {"$set": {
             "status": LoanStatus.APPROVED.value,
@@ -707,10 +714,52 @@ async def approve_loan_application(application_id: str, current_user: User = Dep
         }}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Application not found")
+    interest_rates = {
+        LoanType.PERSONAL.value: 15.0,
+        LoanType.BUSINESS.value: 18.0,
+        LoanType.SALARY_ADVANCE.value: 10.0,
+        LoanType.EMERGENCY.value: 20.0,
+        LoanType.EDUCATION.value: 12.0,
+        LoanType.AGRICULTURE.value: 8.0,
+    }
     
-    return {"message": "Loan application approved"}
+    loan_type = application.get("loan_type", LoanType.PERSONAL.value)
+    principal = application.get("loan_amount", 0)
+    duration = application.get("duration_months", 12)
+    interest_rate = interest_rates.get(loan_type, 15.0)
+    
+    monthly_rate = interest_rate / 100 / 12
+    if monthly_rate > 0:
+        monthly_payment = (principal * monthly_rate * (1 + monthly_rate) ** duration) / ((1 + monthly_rate) ** duration - 1)
+    else:
+        monthly_payment = principal / duration
+    
+    total_repayable = monthly_payment * duration
+    first_payment_date = datetime.now(timezone.utc) + timedelta(days=30)
+    
+    count = await db.loans.count_documents({})
+    loan_number = f"LN{count + 1:08d}"
+    
+    loan = Loan(
+        loan_number=loan_number,
+        application_id=application_id,
+        customer_id=application.get("customer_id"),
+        loan_type=loan_type,
+        principal_amount=principal,
+        interest_rate=interest_rate,
+        duration_months=duration,
+        monthly_payment=round(monthly_payment, 2),
+        total_repayable=round(total_repayable, 2),
+        outstanding_balance=round(total_repayable, 2),
+        first_payment_date=first_payment_date,
+        next_payment_date=first_payment_date,
+        loan_officer_id=current_user.id,
+        status=LoanStatus.ACTIVE
+    )
+    doc = serialize_datetime(loan.model_dump())
+    await db.loans.insert_one(doc)
+    
+    return {"message": "Loan application approved and loan created", "loan_number": loan_number}
 
 @api_router.post("/loans", response_model=Loan)
 async def create_loan(loan_input: LoanCreate, current_user: User = Depends(get_current_user)):
