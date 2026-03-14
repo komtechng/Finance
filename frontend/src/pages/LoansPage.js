@@ -24,6 +24,7 @@ export default function LoansPage() {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [appForm, setAppForm] = useState({
     customer_id: '',
+    customer_name_manual: '',
     loan_type: 'personal',
     loan_amount: '',
     duration_months: '12',
@@ -153,16 +154,53 @@ export default function LoansPage() {
               <form onSubmit={handleAppSubmit} className="space-y-5 mt-4" data-testid="loan-application-form">
                 <div className="space-y-2">
                   <Label className="text-slate-700 font-medium">Customer *</Label>
-                  <Select value={appForm.customer_id} onValueChange={(value) => setAppForm({ ...appForm, customer_id: value })}>
+                  <Select 
+                    value={appForm.customer_id} 
+                    onValueChange={(value) => setAppForm({ ...appForm, customer_id: value })}
+                  >
                     <SelectTrigger className="h-11" data-testid="customer-select">
-                      <SelectValue placeholder="Select customer" />
+                      <SelectValue placeholder="Select customer or start typing..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {customers.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.full_name} - {c.customer_number}</SelectItem>
-                      ))}
+                      {customers.length === 0 ? (
+                        <div className="px-2 py-6 text-center text-sm text-slate-500">
+                          No customers found. Create a customer first.
+                        </div>
+                      ) : (
+                        customers.map(c => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.full_name} - {c.customer_number}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
+                  {customers.length === 0 && (
+                    <p className="text-xs text-orange-600">
+                      No customers available. Please create a customer in the Customers page first.
+                    </p>
+                  )}
+                  <div className="text-xs text-slate-500 mt-1">
+                    Customers available: {customers.length} | Or type customer ID below
+                  </div>
+                  <Input 
+                    placeholder="Or enter Customer ID manually (e.g., CUST000001)" 
+                    value={appForm.customer_name_manual}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAppForm({ ...appForm, customer_name_manual: value });
+                      // Try to find customer by ID or name
+                      const found = customers.find(c => 
+                        c.customer_number === value || 
+                        c.full_name.toLowerCase().includes(value.toLowerCase())
+                      );
+                      if (found) {
+                        setAppForm(prev => ({ ...prev, customer_id: found.id }));
+                      }
+                    }}
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20 mt-2"
+                    data-testid="customer-manual-input"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
