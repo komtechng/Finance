@@ -199,7 +199,7 @@ class LoanApplication(BaseModel):
     loan_type: LoanType = LoanType.PERSONAL
     loan_amount: float
     purpose: str
-    duration_months: int
+    duration_months: Optional[int] = 12
     employment_status: Optional[str] = None
     monthly_income: Optional[float] = None
     collateral_type: Optional[str] = None
@@ -237,7 +237,7 @@ class Loan(BaseModel):
     loan_number: str
     application_id: str
     customer_id: str
-    loan_type: LoanType
+    loan_type: LoanType = LoanType.PERSONAL
     principal_amount: float
     interest_rate: float
     duration_months: int
@@ -255,7 +255,7 @@ class Loan(BaseModel):
     disbursement_reference: Optional[str] = None
     first_payment_date: Optional[datetime] = None
     next_payment_date: Optional[datetime] = None
-    loan_officer_id: str
+    loan_officer_id: Optional[str] = None
     status: LoanStatus = LoanStatus.APPROVED
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
