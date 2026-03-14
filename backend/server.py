@@ -554,7 +554,7 @@ async def create_savings_transaction(
     transaction_input: SavingsTransactionCreate,
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role not in [UserRole.AGENT, UserRole.SAVINGS_OFFICER]:
+    if current_user.role not in [UserRole.AGENT, UserRole.SAVINGS_OFFICER, UserRole.CASHIER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     account = await db.savings_accounts.find_one({"id": transaction_input.account_id})

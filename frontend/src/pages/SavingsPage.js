@@ -101,6 +101,14 @@ export default function SavingsPage() {
 
   const isCashier = ['cashier', 'branch_manager', 'super_admin'].includes(user?.role);
   const canCreateAccount = ['super_admin', 'branch_manager', 'savings_officer', 'agent'].includes(user?.role);
+  const canRecordCollection = ['super_admin', 'branch_manager', 'savings_officer', 'agent', 'cashier'].includes(user?.role);
+
+  // Calculate collection stats
+  const today = new Date().toDateString();
+  const todaysCollections = transactions.filter(t => new Date(t.collection_date).toDateString() === today);
+  const todaysTotal = todaysCollections.reduce((sum, t) => sum + t.amount, 0);
+  const pendingVerifications = transactions.filter(t => !t.verified_by_cashier).length;
+  const verifiedToday = transactions.filter(t => t.verified_by_cashier && new Date(t.verification_date).toDateString() === today).length;
 
   return (
     <div className="p-6 max-w-7xl mx-auto" data-testid="savings-page">
@@ -248,9 +256,32 @@ export default function SavingsPage() {
         </TabsContent>
 
         <TabsContent value="collections">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <Card className="p-6 border border-blue-100 bg-blue-50">
+              <p className="text-sm font-medium text-blue-700 uppercase tracking-wider mb-2">Today's Collections</p>
+              <p className="text-3xl font-heading font-bold text-blue-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{todaysCollections.length}</p>
+              <p className="text-sm text-blue-600 mt-1">{formatCurrency(todaysTotal)}</p>
+            </Card>
+            <Card className="p-6 border border-emerald-100 bg-emerald-50">
+              <p className="text-sm font-medium text-emerald-700 uppercase tracking-wider mb-2">Verified Today</p>
+              <p className="text-3xl font-heading font-bold text-emerald-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{verifiedToday}</p>
+              <p className="text-sm text-emerald-600 mt-1">Approved</p>
+            </Card>
+            <Card className="p-6 border border-orange-100 bg-orange-50">
+              <p className="text-sm font-medium text-orange-700 uppercase tracking-wider mb-2">Pending Verification</p>
+              <p className="text-3xl font-heading font-bold text-orange-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{pendingVerifications}</p>
+              <p className="text-sm text-orange-600 mt-1">Awaiting cashier</p>
+            </Card>
+            <Card className="p-6 border border-slate-100 bg-slate-50">
+              <p className="text-sm font-medium text-slate-700 uppercase tracking-wider mb-2">Total Collections</p>
+              <p className="text-3xl font-heading font-bold text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>{transactions.length}</p>
+              <p className="text-sm text-slate-600 mt-1">All time</p>
+            </Card>
+          </div>
+
           <div className="flex justify-between items-center mb-6">
             <p className="text-slate-600">Record and verify daily contributions</p>
-            {['agent', 'savings_officer'].includes(user?.role) && (
+            {canRecordCollection && (
               <Dialog open={openCollection} onOpenChange={setOpenCollection}>
                 <DialogTrigger asChild>
                   <Button className="bg-primary text-white" data-testid="record-collection-button">
@@ -277,7 +308,7 @@ export default function SavingsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {customers.filter(c => accounts.some(a => a.customer_id === c.id && a.is_active)).map(c => (
-                            <SelectItem key={c.id} value={c.id}>{c.full_name}</SelectItem>
+                            <SelectItem key={c.id} value={c.id}>{c.full_name} - {c.customer_number}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -305,6 +336,7 @@ export default function SavingsPage() {
                         onChange={(e) => setCollectionForm({ ...collectionForm, amount: e.target.value })} 
                         required 
                         className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="1000"
                         data-testid="amount-input" 
                       />
                     </div>
@@ -315,6 +347,7 @@ export default function SavingsPage() {
                         value={collectionForm.notes} 
                         onChange={(e) => setCollectionForm({ ...collectionForm, notes: e.target.value })} 
                         className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20"
+                        placeholder="Collection notes"
                         data-testid="notes-input" 
                       />
                     </div>
@@ -380,8 +413,25 @@ export default function SavingsPage() {
           </div>
 
           {transactions.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-lg border border-slate-200">
-              <p className="text-slate-500">No collections recorded yet</p>
+            <div className="text-center py-16 bg-white rounded-lg border border-slate-200">
+              <div className="max-w-md mx-auto">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">No Collections Recorded Yet</h3>
+                <p className="text-slate-600 mb-6">
+                  Start recording daily, weekly, or monthly savings collections from your customers
+                </p>
+                {canRecordCollection && (
+                  <Button onClick={() => setOpenCollection(true)} className="bg-primary text-white" data-testid="empty-state-record-button">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Record First Collection
+                  </Button>
+                )}
+                {!canRecordCollection && (
+                  <p className="text-sm text-slate-500">Contact your agent or savings officer to record collections</p>
+                )}
+              </div>
             </div>
           )}
         </TabsContent>
