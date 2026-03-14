@@ -745,7 +745,7 @@ async def get_investments(investor_id: Optional[str] = None, current_user: User 
 # ATM Transaction Endpoints
 @api_router.post("/atm/transactions", response_model=ATMTransaction)
 async def create_atm_transaction(txn_input: ATMTransactionCreate, current_user: User = Depends(get_current_user)):
-    if current_user.role not in [UserRole.POS_OPERATOR, UserRole.CASHIER]:
+    if current_user.role not in [UserRole.POS_OPERATOR, UserRole.CASHIER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     count = await db.atm_transactions.count_documents({})
@@ -806,7 +806,7 @@ async def update_product(product_id: str, quantity_change: int, current_user: Us
 # Sales Endpoints
 @api_router.post("/sales", response_model=Sale)
 async def create_sale(sale_input: SaleCreate, current_user: User = Depends(get_current_user)):
-    if current_user.role not in [UserRole.POS_OPERATOR, UserRole.CASHIER]:
+    if current_user.role not in [UserRole.POS_OPERATOR, UserRole.CASHIER, UserRole.BRANCH_MANAGER, UserRole.SUPER_ADMIN]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     count = await db.sales.count_documents({})
