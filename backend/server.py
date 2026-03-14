@@ -456,6 +456,32 @@ async def login(credentials: UserLogin):
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
+# User Management Endpoints
+@api_router.get("/users", response_model=List[User])
+async def get_users(current_user: User = Depends(get_current_user)):
+    if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.BRANCH_MANAGER, UserRole.AUDITOR]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    for user_data in users:
+        deserialize_datetime(user_data, ['created_at'])
+    return users
+
+@api_router.put("/users/{user_id}")
+async def update_user(user_id: str, updates: dict, current_user: User = Depends(get_current_user)):
+    if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.BRANCH_MANAGER]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": updates}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User updated successfully"}
+
 # Customer Endpoints
 @api_router.post("/customers", response_model=Customer)
 async def create_customer(customer_input: CustomerCreate, current_user: User = Depends(get_current_user)):

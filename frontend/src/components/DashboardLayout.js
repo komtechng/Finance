@@ -26,6 +26,7 @@ export default function DashboardLayout() {
     { name: 'POS/Inventory', path: '/dashboard/pos', icon: Package, roles: ['super_admin', 'branch_manager', 'pos_operator'] },
     { name: 'Cash Office', path: '/dashboard/cash', icon: BarChart3, roles: ['super_admin', 'branch_manager', 'cashier'] },
     { name: 'Reports', path: '/dashboard/reports', icon: FileText, roles: ['super_admin', 'branch_manager', 'auditor'] },
+    { name: 'Staff', path: '/dashboard/staff', icon: Users, roles: ['super_admin', 'branch_manager'] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => 

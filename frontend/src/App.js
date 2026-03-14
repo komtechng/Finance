@@ -15,6 +15,7 @@ import ATMPage from './pages/ATMPage';
 import POSPage from './pages/POSPage';
 import CashOfficePage from './pages/CashOfficePage';
 import ReportsPage from './pages/ReportsPage';
+import StaffPage from './pages/StaffPage';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="pos" element={<POSPage />} />
             <Route path="cash" element={<CashOfficePage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="staff" element={<StaffPage />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
